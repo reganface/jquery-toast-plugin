@@ -172,7 +172,6 @@ if ( typeof Object.create !== 'function' ) {
             if (this.options.modal) {
 
                 this._toastEl.on('click', function ( e ) {
-                    console.log("clicked");
 
                     e.preventDefault();
 
