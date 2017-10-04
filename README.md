@@ -1,8 +1,19 @@
 # Jquery Toast Plugin
 
-A plugin to show highly customizable notifications to the user. 
+A plugin to show highly customizable notifications to the user.
 
 <img src="http://i.imgur.com/RRrb0KE.png" />
+
+# This Fork
+Modal option was added to dim background and dismiss toast on toast click or background click.  Defaults to off (false).
+```javascript
+$.toast({
+    text: "This is a toast modal",
+    position: "mid-center",
+    hideAfter: false,
+    modal: true
+});
+```
 
 # How to use
 
@@ -11,13 +22,13 @@ A plugin to show highly customizable notifications to the user.
     ```js
     bower install jquery-toast-plugin
     ```
-    
+
     or via `npm`
-    
+
     ```js
     npm install jquery-toast-plugin
     ```
-    
+
     Or directly download the repository and place the content of `dist` wherever you can access them.
 - Include the CSS and JS files.
 - Simply do ```$.toast('Toast message to be shown')``` Of course it would be the world's simplest toast message but believe me **you can do a lot more** with the options.
@@ -61,16 +72,16 @@ $.toast({
 
 **Changing the animations**
 ```javascript
-$.toast({ 
-  text : "Let's test some HTML stuff... <a href='#'>github</a>", 
+$.toast({
+  text : "Let's test some HTML stuff... <a href='#'>github</a>",
   showHideTransition : 'slide'  // It can be plain, fade or slide
 })
 ```
 
 **Changing the formatting**
 ```javascript
-$.toast({ 
-  text : "Let's test some HTML stuff... <a href='#'>github</a>", 
+$.toast({
+  text : "Let's test some HTML stuff... <a href='#'>github</a>",
   showHideTransition : 'slide',  // It can be plain, fade or slide
   bgColor : 'blue',              // Background color for toast
   textColor : '#eee',            // text color

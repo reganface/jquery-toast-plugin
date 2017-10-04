@@ -11,7 +11,7 @@ if ( typeof Object.create !== 'function' ) {
 (function( $, window, document, undefined ) {
 
     "use strict";
-    
+
     var Toast = {
 
         _positionClasses : ['bottom-left', 'bottom-right', 'top-right', 'top-left', 'bottom-center', 'top-center', 'mid-center'],
@@ -41,15 +41,19 @@ if ( typeof Object.create !== 'function' ) {
         },
 
         setup: function () {
-            
+
             var _toastContent = '';
-            
+
             this._toastEl = this._toastEl || $('<div></div>', {
                 class : 'jq-toast-single'
             });
 
+            if (this.options.modal) {
+                this._toastEl.addClass('jq-toast-single-closeable');
+            }
+
             // For the loader on top
-            _toastContent += '<span class="jq-toast-loader"></span>';            
+            _toastContent += '<span class="jq-toast-loader"></span>';
 
             if ( this.options.allowToastClose ) {
                 _toastContent += '<span class="close-jq-toast-single">&times;</span>';
@@ -159,39 +163,88 @@ if ( typeof Object.create !== 'function' ) {
                         that._toastEl.trigger('afterHidden');
                     });
                 }
+
+                if (that.options.modal) {
+                    that._modal.fadeOut();
+                }
             });
+
+            if (this.options.modal) {
+
+                this._toastEl.on('click', function ( e ) {
+                    console.log("clicked");
+
+                    e.preventDefault();
+
+                    if( that.options.showHideTransition === 'fade') {
+                        that._toastEl.trigger('beforeHide');
+                        that._toastEl.fadeOut(function () {
+                            that._toastEl.trigger('afterHidden');
+                        });
+                    } else if ( that.options.showHideTransition === 'slide' ) {
+                        that._toastEl.trigger('beforeHide');
+                        that._toastEl.slideUp(function () {
+                            that._toastEl.trigger('afterHidden');
+                        });
+                    } else {
+                        that._toastEl.trigger('beforeHide');
+                        that._toastEl.hide(function () {
+                            that._toastEl.trigger('afterHidden');
+                        });
+                    }
+
+                    that._modal.fadeOut();
+
+                });
+            }
+
+            this._modal.off('click').one('click', function ( e ) {
+
+                e.preventDefault();
+
+                that.close();
+
+            });
+
 
             if ( typeof this.options.beforeShow == 'function' ) {
                 this._toastEl.on('beforeShow', function () {
-                    that.options.beforeShow();
+                    that.options.beforeShow(that._toastEl);
                 });
             };
 
             if ( typeof this.options.afterShown == 'function' ) {
                 this._toastEl.on('afterShown', function () {
-                    that.options.afterShown();
+                    that.options.afterShown(that._toastEl);
                 });
             };
 
             if ( typeof this.options.beforeHide == 'function' ) {
                 this._toastEl.on('beforeHide', function () {
-                    that.options.beforeHide();
+                    that.options.beforeHide(that._toastEl);
                 });
             };
 
             if ( typeof this.options.afterHidden == 'function' ) {
                 this._toastEl.on('afterHidden', function () {
-                    that.options.afterHidden();
+                    that.options.afterHidden(that._toastEl);
                 });
-            };          
+            };
+
+            if ( typeof this.options.onClick == 'function' ) {
+                this._toastEl.on('click', function () {
+                    that.options.onClick(that._toastEl);
+                });
+            };
         },
 
         addToDom: function () {
 
              var _container = $('.jq-toast-wrap');
-             
+             var _modal = $('.jq-toast-modal-bg');
+
              if ( _container.length === 0 ) {
-                
+
                 _container = $('<div></div>',{
                     class: "jq-toast-wrap"
                 });
@@ -202,12 +255,21 @@ if ( typeof Object.create !== 'function' ) {
                 _container.empty();
              }
 
+             if ( _modal.length === 0 ) {
+
+                 _modal = $('<div></div>', {
+                    class: "jq-toast-modal-bg"
+                 });
+
+                 $('body').append( _modal );
+             }
+
              _container.find('.jq-toast-single:hidden').remove();
 
              _container.append( this._toastEl );
 
             if ( this.options.stack && !isNaN( parseInt( this.options.stack ), 10 ) ) {
-                
+
                 var _prevToastCount = _container.find('.jq-toast-single').length,
                     _extToastCount = _prevToastCount - this.options.stack;
 
@@ -218,6 +280,7 @@ if ( typeof Object.create !== 'function' ) {
             }
 
             this._container = _container;
+            this._modal = _modal;
         },
 
         canAutoHide: function () {
@@ -271,12 +334,17 @@ if ( typeof Object.create !== 'function' ) {
                 });
             }
 
+            if (this.options.modal) {
+                this._modal.fadeIn();
+                $('body').addClass('jq-no-scroll');
+            }
+
             if (this.canAutoHide()) {
 
                 var that = this;
 
                 window.setTimeout(function(){
-                    
+
                     if ( that.options.showHideTransition.toLowerCase() === 'fade' ) {
                         that._toastEl.trigger('beforeHide');
                         that._toastEl.fadeOut(function () {
@@ -292,6 +360,11 @@ if ( typeof Object.create !== 'function' ) {
                         that._toastEl.hide(function () {
                             that._toastEl.trigger('afterHidden');
                         });
+                    }
+
+                    if (that.options.modal) {
+                        that._modal.fadeOut();
+                        $('body').removeClass('jq-no-scroll');
                     }
 
                 }, this.options.hideAfter);
@@ -312,21 +385,29 @@ if ( typeof Object.create !== 'function' ) {
             this.prepareOptions(options, this.options);
             this.setup();
             this.bindToast();
+        },
+
+        close: function() {
+            this._toastEl.find('.close-jq-toast-single').click();
         }
     };
-    
+
     $.toast = function(options) {
         var toast = Object.create(Toast);
         toast.init(options, this);
 
         return {
-            
+
             reset: function ( what ) {
                 toast.reset( what );
             },
 
             update: function( options ) {
                 toast.update( options );
+            },
+
+            close: function( ) {
+            	toast.close( );
             }
         }
     };
@@ -345,10 +426,12 @@ if ( typeof Object.create !== 'function' ) {
         textColor: false,
         textAlign: 'left',
         icon: false,
+        modal: false,
         beforeShow: function () {},
         afterShown: function () {},
         beforeHide: function () {},
-        afterHidden: function () {}
+        afterHidden: function () {},
+        onClick: function () {}
     };
 
 })( jQuery, window, document );
